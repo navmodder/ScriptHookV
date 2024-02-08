@@ -1,42 +1,29 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Project name
 project(ScriptHookV)
 
-# Source files
+# Set the C++ standard
+set(CMAKE_CXX_STANDARD 14)
+
+# Add source files
 set(SOURCES
-    src/Config/Config.cpp
-    src/Core/Core.cpp
-    src/Main.cpp
-    src/Pch/Common.cpp
+    src/stdafx.h
+    src/dllmain.cpp
+    src/stdafx.cpp
 )
 
-# Header files
-set(HEADERS
-    src/Config/Config.hpp
-    src/Core/Core.hpp
-    src/Exports/Exports.hpp
-    src/Json/Json.hpp
-    src/Pch/Common.hpp
+# Define the executable or library
+add_library(ScriptHookV SHARED ${SOURCES})
+
+# Set compiler flags and options
+target_compile_options(ScriptHookV PRIVATE
+    $<$<CONFIG:Debug>:/DDEBUG /MDd /Zi>
+    $<$<CONFIG:Release>:/DNDEBUG /MD /O2>
 )
 
-# Add library
-add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
-
-# Include directories
-target_include_directories(${PROJECT_NAME} PRIVATE src)
-
-# Set compile options
-target_compile_options(${PROJECT_NAME} PRIVATE
-    $<$<CONFIG:Debug>: /W3 /DWIN32 /D_DEBUG /DSCRIPTHOOKV_EXPORTS /D_WINDOWS /D_USRDLL /GR /EHsc>
-    $<$<CONFIG:Release>: /W3 /DNDEBUG /DWIN32 /DSCRIPTHOOKV_EXPORTS /D_WINDOWS /D_USRDLL /GR /EHsc>
-)
-
-# Set precompiled header
-target_precompile_headers(${PROJECT_NAME} PRIVATE "src/Pch/Common.hpp")
-
-# Set Windows specific options
+# Additional configurations based on platform
 if(WIN32)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE _UNICODE)
-    set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set_target_properties(ScriptHookV PROPERTIES COMPILE_DEFINITIONS _WIN64)
+    endif()
 endif()
