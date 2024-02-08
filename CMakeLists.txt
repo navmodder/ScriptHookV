@@ -7,13 +7,17 @@ set(CMAKE_CXX_STANDARD 14)
 
 # Add source files
 set(SOURCES
-    src/stdafx.h
     src/dllmain.cpp
     src/stdafx.cpp
 )
 
-# Define the executable or library
-add_library(ScriptHookV SHARED ${SOURCES})
+# Add header files
+set(HEADERS
+    src/stdafx.h
+)
+
+# Define the shared library target
+add_library(ScriptHookV SHARED ${SOURCES} ${HEADERS})
 
 # Set compiler flags and options
 target_compile_options(ScriptHookV PRIVATE
@@ -21,9 +25,10 @@ target_compile_options(ScriptHookV PRIVATE
     $<$<CONFIG:Release>:/DNDEBUG /MD /O2>
 )
 
-# Additional configurations based on platform
-if(WIN32)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set_target_properties(ScriptHookV PROPERTIES COMPILE_DEFINITIONS _WIN64)
-    endif()
-endif()
+# Define preprocessor definitions
+target_compile_definitions(ScriptHookV PRIVATE
+    $<$<BOOL:${WIN32}>:_WINDOWS>
+    $<$<BOOL:${CMAKE_SIZEOF_VOID_P} EQUAL 8>:_WIN64>
+)
+
+# Additional configurations based on platform or build configuration
